@@ -1,4 +1,4 @@
-from HBOSagg import HBOSAgg
+from models.HBOSagg import HBOSAgg
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import RobustScaler
@@ -12,4 +12,4 @@ my_hbos_agg = HBOSAgg(instances=5, dynamic_bins=True)
 my_hbos_agg.fit(arr_pareto)
 
 scores = my_hbos_agg.decision_scores_
-print(scores)
+print("HBOSAgg tested successfully")
