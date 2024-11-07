@@ -1,10 +1,5 @@
 from models.MedianLevelShift import MLS
 import numpy as np
-import pandas as pd
-from sklearn.preprocessing import RobustScaler
-import seaborn as sns
-
-scaler = RobustScaler()
 
 # Generate univariate data from a Pareto distribution with shape/slope 3
 # and 1000 samples
