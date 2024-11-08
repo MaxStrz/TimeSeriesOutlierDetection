@@ -9,6 +9,7 @@ arr_pareto = np.random.pareto(3, (1000, 4))
 
 # Create dataframe from array
 df = pd.DataFrame(arr_pareto, columns=['V1', 'V2', 'V3', 'V4'])
+df.attrs = {'name':'df1'}
 
 # Create partitions of the data
 def create_partitions(df, partition_size):
@@ -29,13 +30,11 @@ def create_partitions(df, partition_size):
 
     for i, arr_partition in enumerate(arr_partitions):
         df_part = pd.DataFrame(arr_partition, columns=df.columns)
-        dict_partitions[i] = df_part
+        dict_partitions[f"{df.attrs['name']}_{i}"] = df_part
     
     return dict_partitions
 
 dict_partitions = create_partitions(df, 50)
-
-print(dict_partitions[0])
 
 my_mvp = MVPDetect() # Create a MedianLevelShift instance. Window size defaults to 50
 #my_2sm.fit(arr_pareto) # Fit the model to the data
