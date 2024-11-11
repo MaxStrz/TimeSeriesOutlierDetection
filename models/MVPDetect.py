@@ -117,10 +117,11 @@ class MVPDetect:
                 # previous neural network weights as a starting point for the 
                 # next training. But this requires useing the same training 
                 # variables so the process must be repeated for each dependent
-                # variable. Some change.
+                # variable. Some other change.
 
                 # USE ME 4 MLP #if kpi == 'V1' or kpi == 'V2' or kpi == 'V3': 
                 #    continue
+                # some new line
 
                 # scale training data
                 my_scalar = RobustScaler().fit(train)
