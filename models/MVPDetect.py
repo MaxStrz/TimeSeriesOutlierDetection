@@ -20,8 +20,9 @@ class ParamLearnerLinReg:
         self.dict_of_all_coefficients = defaultdict(dict)
 
     def learn_params(self, X_train, y_name, fitted_model, trainin):
-        s, cs, ce, p = trainin
-        dict_key = (s, cs, ce, p, y_name)
+        #s, cs, ce, p = trainin
+        #dict_key = (s, cs, ce, p, y_name)
+        dict_key = (trainin, y_name)
         for variable in X_train:
             self.dict_of_all_coefficients[dict_key][variable] = fitted_model.coef_[X_train.columns.get_loc(variable)]
         self.dict_of_all_coefficients[dict_key]['intercept'] = fitted_model.intercept_
@@ -94,7 +95,7 @@ class MVPDetect:
         ----------
         dict_partitions : dict
             A dictionary of dataframes, each dataframe representing a partition.
-            Keys are tuples of (serial, coil_serial, coil_element, partition).
+            Keys must be unique identifiers.
         
         train_test_pairs : list
             A list of nested tuples with structure ((trainin), (testin)).
@@ -114,10 +115,11 @@ class MVPDetect:
             for kpi in train:
                 # Scikit-learn MLP has a neat warm_start option to use the
                 # previous neural network weights as a starting point for the 
-                # next training. But this requires useing the same training KPIs
-                # so the process must be repeated for each KPI.
+                # next training. But this requires useing the same training 
+                # variables so the process must be repeated for each dependent
+                # variable.
 
-                # USE ME 4 MLP #if kpi == 'CNL' or kpi == 'SSR' or kpi == 'CSP': 
+                # USE ME 4 MLP #if kpi == 'V1' or kpi == 'V2' or kpi == 'V3': 
                 #    continue
 
                 # scale training data
@@ -200,7 +202,7 @@ class MVPDetect:
     def _create_ce_outlier_scores(self, partition_size):
         self.df_ce_outlier_scores = pd.DataFrame.from_dict(
             self.aggregated_scores_, 
-            orient='index').groupby(level=[0, 1, 2]).max()
+            orient='index')#.groupby(level=[0, 1, 2]).max()
         
         for column in self.df_ce_outlier_scores:
             # rename column

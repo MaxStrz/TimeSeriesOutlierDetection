@@ -8,13 +8,13 @@ import pandas as pd
 arr_pareto = np.random.pareto(3, (1000, 4))
 
 # Create dataframe from array
-df = pd.DataFrame(arr_pareto, columns=['V1', 'V2', 'V3', 'V4'])
-df.attrs = {'name':'df1'}
+df1 = pd.DataFrame(arr_pareto, columns=['V1', 'V2', 'V3', 'V4'])
+df1.attrs = {'name':'df1'}
 
 # Create partitions of the data
 def create_partitions(df, partition_size):
     # Remainder of division of dataframe length by partition_size
-    remainder = len(df) % partition_size 
+    remainder = len(df) % partition_size
 
     if remainder == 0:
         df_no_remainder = df
@@ -34,8 +34,17 @@ def create_partitions(df, partition_size):
     
     return dict_partitions
 
-dict_partitions = create_partitions(df, 50)
+dict_partitions = create_partitions(df1, 50)
+
+def create_train_test_idx(idx):
+    # Return all possible combinations of train and test partitions within the
+    # same dataframe and without using same partition for both train and test
+    train_test_idx = [(tr, te) for tr in idx for te in idx if tr != te]
+    return train_test_idx
+
+train_test_idx = create_train_test_idx(list(dict_partitions.keys()))
 
 my_mvp = MVPDetect() # Create a MedianLevelShift instance. Window size defaults to 50
-#my_2sm.fit(arr_pareto) # Fit the model to the data
-#print("MedianLevelShift tested successfully")
+my_mvp.fit_predict(dict_partitions, train_test_idx) # Fit the model to the data
+
+print("MVPDetect tested successfully")
