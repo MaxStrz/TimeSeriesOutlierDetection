@@ -1,10 +1,9 @@
 from models.MedianLevelShift import MLS
+from test.test_data import my_data
 import numpy as np
 
-# Generate univariate data from a Pareto distribution with shape/slope 3
-# and 1000 samples
-arr_pareto = np.random.pareto(3, (1000,))
+data_instance = my_data()
 
 my_2sm = MLS() # Create a MedianLevelShift instance. Window size defaults to 50
-my_2sm.fit(arr_pareto) # Fit the model to the data
+my_2sm.fit(data_instance.one_dim_pareto) # Fit the model to the data
 print("MedianLevelShift tested successfully")
