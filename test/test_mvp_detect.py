@@ -4,11 +4,10 @@ from sklearn.metrics import mean_squared_error
 from models.MVPDetect import MVPDetect, ParamLearnerLinReg
 from test.test_data import my_data
 
-def test_fit_predict():
+def test_fit_predict(my_data_fixture):
     # Data Generation
-    data = my_data()
-    partitions = data.dict_partitions
-    train_test_pairs = data.train_test_idx
+    partitions = my_data_fixture.dict_partitions
+    train_test_pairs = my_data_fixture.train_test_idx
 
     # Model Initialization
     detector = MVPDetect(
@@ -42,5 +41,5 @@ def test_fit_predict():
     variables = len(list(partitions.values())[0].columns)
     assert coeffs == variables * len(partitions), "Incorrect number of coeffs."
 
-    
+
 
