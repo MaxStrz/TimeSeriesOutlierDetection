@@ -110,7 +110,7 @@ class MVPDetect:
         # tqdm is used to show a progress bar.
         # iterate over all partitions
         for trainin, train in tqdm(itertools.islice(dict_partitions.items(), 
-                                                    0, 
+                                                    0,
                                                     iteration_limit)):
             for kpi in train:
                 # Scikit-learn MLP has a neat warm_start option to use the
