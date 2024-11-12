@@ -3,7 +3,6 @@ from scipy.stats import median_abs_deviation
 
 from models.base import PredEstBase
 
-
 class MLS(PredEstBase):
     """
     Detects level shifts in univariate data using the median of each window.

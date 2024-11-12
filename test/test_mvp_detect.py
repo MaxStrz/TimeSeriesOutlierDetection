@@ -2,7 +2,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
 from models.MVPDetect import MVPDetect, ParamLearnerLinReg
-from test.test_data import my_data
 
 def test_fit_predict_linreg(my_data_fixture):
     # Data Generation

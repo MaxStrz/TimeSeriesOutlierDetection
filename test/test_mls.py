@@ -1,5 +1,4 @@
 from models.MedianLevelShift import MLS
-from test.test_data import my_data
 import numpy as np
 
 def test_mls(my_data_fixture):
