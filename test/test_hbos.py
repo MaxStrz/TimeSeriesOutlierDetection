@@ -42,4 +42,3 @@ def test_invalid_bin_count():
     with pytest.raises(ValueError):
         hbosdyn = HBOS_dynamic_bins(dynamic_bins=True, n_bins=1)
         hbosdyn.fit(np.random.rand(200, 5))
-
