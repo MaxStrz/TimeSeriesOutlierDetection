@@ -35,6 +35,38 @@ class Config:
          }
 
 class TransformRawData:
+    """ Turns raw csv files into single cleaned, scaled dataframe.
+
+    The class is designed to be used in a pipeline. The methods are
+    designed to be called in a specific order. The order is as follows:
+    1. create_df_all
+    2. create_multi_index
+    3. clean_data
+    4. remove_columns
+    5. robust_scale_data
+    
+    The class has a run method that calls all the methods in the correct order.
+
+    Parameters
+    ----------
+    analysis_name : str
+        Name of the analysis. Must correspond to existing folder name.
+        The folder must contain a 'data' folder with a 'raw_csv' folder
+        containing the raw csv files.
+    
+    Attributes
+    ----------
+    _paths : AnalysisPaths
+        Creates an instance of the AnalysisPaths class.
+        The class creates the paths to the raw csv files based on the
+        analysis_name.
+    
+    labels : pd.DataFrame
+
+    
+    
+
+    """
     sensors = ['sensor_1', 'sensor_2', 'sensor_3', 'sensor_4']
     idx = ['car_id', 'component_id', 'component_part_id']
     config = Config()
@@ -45,6 +77,7 @@ class TransformRawData:
         self._paths = AnalysisPaths(self.analysis_name)
         self.labels = None
         self.df_all = None
+        self.robust_scaler = None
         self._called_methods = set()
 
     def _make_df(self,
@@ -109,6 +142,7 @@ class TransformRawData:
     def clean_data(self):
         cols_to_clean = self.sensors
         df = self.df_all
+        index = self.idx
 
         # Only the kpis are required for removing outliers
         df = df[cols_to_clean]
@@ -121,6 +155,22 @@ class TransformRawData:
         self.df_all = self.df_all[~over_stds_idx].reset_index(drop=True)
 
         self._called_methods.add("clean_data")
+
+        return self
+    
+    def create_labels(self,
+                      score_column='non_defect_likelihood',
+                      score_threshold=0.5,
+                      threshold_count=500
+                      ):
+        df = self.df_all
+
+        low_score = df[score_column] < score_threshold
+        counts = low_score.groupby(level=[0, 1, 2]).sum()
+        
+        self.labels = counts > threshold_count
+
+        self._called_methods.add("create_labels")
 
         return self
 
@@ -160,15 +210,17 @@ class TransformRawData:
     def run(self):
         return(
             self.create_df_all()
-            .create_multi_index()
             .clean_data()
+            .create_multi_index()
+            .create_labels()
             .remove_columns()
             .robust_scale_data()
         )
 
     def __repr__(self):
-        methods = {"create_df_all", "create_multi_index", "clean_data",
-                   "remove_columns", "robust_scale_data", "None"}
+        methods = {"create_df_all", "clean_data", "create_multi_index",
+                   "create_labels", "remove_columns", "robust_scale_data",
+                   "None"}
         pending_methods = methods - self._called_methods
         note = f"TransformRawData instance. Pending methods: {pending_methods}"
         return note
