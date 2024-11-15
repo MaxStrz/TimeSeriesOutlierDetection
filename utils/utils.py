@@ -61,11 +61,20 @@ class TransformRawData:
         The class creates the paths to the raw csv files based on the
         analysis_name.
     
-    labels : pd.DataFrame
+    labels : pd.Series
+        Series with boolean values. True if component part deemed outlier.
 
+    df_all : pd.DataFrame
+        Dataframe with all the data from the raw csv files. The dataframe is
+        transformed, cleaned and scaled by the methods in the class.
     
+    robust_scaler : sklearn.preprocessing.RobustScaler
+        Scaler used to scale the data in the df_all dataframe.
     
-
+    _called_methods : set
+        Set with the names of the methods that have been called. Used to
+        keep track of the order of the methods called.
+    
     """
     sensors = ['sensor_1', 'sensor_2', 'sensor_3', 'sensor_4']
     idx = ['car_id', 
@@ -92,6 +101,8 @@ class TransformRawData:
                  float_separator: str='.',
                  date_column_name: str='timestamp'
                  ) -> pd.DataFrame:
+        
+        """ Generate dataframe from csv file."""
     
         df = pd.read_csv(file_path,
                         dtype=dtypes,
@@ -104,6 +115,9 @@ class TransformRawData:
         return df
 
     def create_df_all(self):
+
+        """Create a single dataframe from all the raw csv files."""
+
         dataframes = []
 
         for file_path in self._paths.raw_file_paths:
@@ -125,12 +139,18 @@ class TransformRawData:
         return self
 
     def _find_outliers(self, df):
+
+        """Find outliers in dataframe based on standard deviation."""
+
         mus = df.mean()
         stds = df.std()
         over_stds_idx = (np.abs(df - mus) > stds * 4).any(axis=1)
         return over_stds_idx
     
     def clean_data(self):
+
+        """Remove outliers from the dataframe."""
+
         cols_to_clean = self.sensors
         df = self.df_all
 
@@ -150,6 +170,8 @@ class TransformRawData:
     
     def _create_tempo_idx_column(self, df, idx, time_column):
 
+        """Create a temporal index column to be used in the multi index."""
+
         tempo_idx = self.tempo_idx
 
         df = df.sort_values(by=idx + [time_column], ascending=True)
@@ -159,6 +181,8 @@ class TransformRawData:
         return df
 
     def create_multi_index(self):
+
+        """Create a multi index for the dataframe."""
 
         df = self.df_all
         idx = self.idx
@@ -180,6 +204,9 @@ class TransformRawData:
                       score_threshold=0.5,
                       threshold_count=500
                       ):
+        
+        """Create outlier labels for each component part."""
+
         df = self.df_all
 
         low_score = df[score_column] < score_threshold
@@ -192,6 +219,9 @@ class TransformRawData:
         return self
 
     def remove_columns(self):
+
+        """Only keep the sensor columns in the dataframe."""
+
         df = self.df_all
         cols_to_keep = self.sensors
         df = df[cols_to_keep]
@@ -203,6 +233,8 @@ class TransformRawData:
 
     def robust_scale_data(self):
         
+        """Scale the data using a RobustScaler."""
+
         df = self.df_all
         data = self.df_all.values
 
@@ -225,6 +257,9 @@ class TransformRawData:
         return self
 
     def run(self):
+
+        """Run all the methods in the correct order."""
+
         return(
             self.create_df_all()
             .clean_data()
@@ -235,6 +270,9 @@ class TransformRawData:
         )
 
     def __repr__(self):
+
+        """Return instance representaion with pending methods."""
+
         methods = {"create_df_all", "clean_data", "create_multi_index",
                    "create_labels", "remove_columns", "robust_scale_data",
                    "None"}
