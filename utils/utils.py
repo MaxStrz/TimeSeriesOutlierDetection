@@ -40,10 +40,11 @@ class TransformRawData:
     The class is designed to be used in a pipeline. The methods are
     designed to be called in a specific order. The order is as follows:
     1. create_df_all
-    2. create_multi_index
-    3. clean_data
-    4. remove_columns
-    5. robust_scale_data
+    2. clean_data
+    3. create_multi_index
+    4. create_labels
+    5. remove_columns
+    6. robust_scale_data
     
     The class has a run method that calls all the methods in the correct order.
 
