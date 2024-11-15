@@ -33,7 +33,7 @@ class Config:
          }
 
 class TransformRawData:
-    variables = ['sensor_1', 'sensor_2', 'sensor_3', 'sensor_4']
+    sensors = ['sensor_1', 'sensor_2', 'sensor_3', 'sensor_4']
     config = Config()
 
     # Name of the analysis must correspond to the folder name
@@ -78,3 +78,12 @@ class TransformRawData:
             dataframes.append(df_cs)
 
         self.df_all = pd.concat(dataframes, ignore_index=True)
+
+    def create_multi_index(self):
+        df = self.df_all
+        index = self.sensors
+        
+        df = df.set_index(index)
+        df.index.names = index
+
+        self.df_all = df
