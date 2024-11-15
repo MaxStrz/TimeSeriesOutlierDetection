@@ -34,6 +34,7 @@ class Config:
 
 class TransformRawData:
     sensors = ['sensor_1', 'sensor_2', 'sensor_3', 'sensor_4']
+    idx = ['car_id', 'component_id', 'component_part_id']
     config = Config()
 
     # Name of the analysis must correspond to the folder name
@@ -81,7 +82,7 @@ class TransformRawData:
 
     def create_multi_index(self):
         df = self.df_all
-        index = self.sensors
+        index = self.idx
         
         df = df.set_index(index)
         df.index.names = index
