@@ -68,7 +68,11 @@ class TransformRawData:
 
     """
     sensors = ['sensor_1', 'sensor_2', 'sensor_3', 'sensor_4']
-    idx = ['car_id', 'component_id', 'component_part_id']
+    idx = ['car_id', 
+           'component_id', 
+           'component_part_id']
+    tempo_idx = 'temporal_index'
+    time_column = 'timestamp'
     config = Config()
 
     # Name of the analysis must correspond to the folder name
@@ -109,7 +113,7 @@ class TransformRawData:
                           index_col=False,
                           separator=',',
                           float_separator='.',
-                          date_column_name="timestamp"
+                          date_column_name=self.time_column
                          )
 
             dataframes.append(df_cs)
@@ -117,19 +121,6 @@ class TransformRawData:
         self.df_all = pd.concat(dataframes, ignore_index=True)
 
         self._called_methods.add("create_df_all")
-
-        return self
-
-    def create_multi_index(self):
-        df = self.df_all
-        index = self.idx
-        
-        df = df.set_index(index)
-        df.index.names = index
-
-        self.df_all = df
-
-        self._called_methods.add("create_multi_index")
 
         return self
 
@@ -142,7 +133,6 @@ class TransformRawData:
     def clean_data(self):
         cols_to_clean = self.sensors
         df = self.df_all
-        index = self.idx
 
         # Only the kpis are required for removing outliers
         df = df[cols_to_clean]
@@ -155,6 +145,33 @@ class TransformRawData:
         self.df_all = self.df_all[~over_stds_idx].reset_index(drop=True)
 
         self._called_methods.add("clean_data")
+
+        return self
+    
+    def _create_tempo_idx_column(self, df, idx, time_column):
+
+        tempo_idx = self.tempo_idx
+
+        df = df.sort_values(by=idx + [time_column], ascending=True)
+
+        df[tempo_idx] = df.groupby(idx).cumcount()
+
+        return df
+
+    def create_multi_index(self):
+
+        df = self.df_all
+        idx = self.idx
+        new_idx = self.idx + [self.tempo_idx]
+        time_column = self.time_column
+        
+        df = self._create_tempo_idx_column(df, idx, time_column)
+        df = df.set_index(new_idx)
+        df.index.names = new_idx
+
+        self.df_all = df
+
+        self._called_methods.add("create_multi_index")
 
         return self
     
