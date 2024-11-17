@@ -1,5 +1,12 @@
 # TimeSeriesOutlierDetection
 
+
+### Data
+The raw data consists of 21 time series as separate csv files. Each time series
+looks like this:
+
+[Structure of raw data](figures/raw_data_structure.png)
+
 ### Models
 
 #### HBOSagg
