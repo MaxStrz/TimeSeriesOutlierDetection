@@ -1,11 +1,17 @@
 # TimeSeriesOutlierDetection
 
 
-### Data
+### Raw Data
 The raw data consists of 21 time series as separate csv files. Each time series
 looks like this:
 
 ![Structure of raw data](figures/raw_data_structure.png)
+
+### Transform Data
+Concatinating the raw data, cleaning it, scaling it and creating a single data
+frame ready for analysis is all done with the 
+[TransformRawData](utils/utils.py) class. The individual steps can be seen in
+[transform_raw_data.ipynb](transform_raw_data.ipynb).
 
 ### Models
 
