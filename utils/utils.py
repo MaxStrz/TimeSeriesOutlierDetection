@@ -15,6 +15,21 @@ class AnalysisPaths:
 
 class Config:
 
+    # Names of data columns
+    data_columns = ['sensor_1', 'sensor_2', 'sensor_3', 'sensor_4']
+    
+    # Names of the columns used to create the initial multi index
+    idx = ['car_id', 
+           'component_id', 
+           'component_part_id']
+    
+    # Name of the temporal index column. Values 0 to n-1 for each
+    # component part.
+    tempo_idx = 'temporal_index'
+
+    # Name of the time column
+    time_column = 'timestamp'
+
     # Confirm column names before generating dataframe    
     column_names = ["brand_id", "car_id", "car_component", "component_id",
                      "timestamp", "component_part_id", "sensor_1", "sensor_2", 
@@ -77,12 +92,7 @@ class TransformRawData:
         keep track of the order of the methods called.
     
     """
-    sensors = ['sensor_1', 'sensor_2', 'sensor_3', 'sensor_4']
-    idx = ['car_id', 
-           'component_id', 
-           'component_part_id']
-    tempo_idx = 'temporal_index'
-    time_column = 'timestamp'
+
     config = Config()
 
     # Name of the analysis must correspond to the folder name
@@ -128,7 +138,7 @@ class TransformRawData:
                           index_col=False,
                           separator=',',
                           float_separator='.',
-                          date_column_name=self.time_column
+                          date_column_name=self.config.time_column
                          )
 
             dataframes.append(df_cs)
@@ -152,7 +162,7 @@ class TransformRawData:
 
         """Remove outliers from the dataframe."""
 
-        cols_to_clean = self.sensors
+        cols_to_clean = self.config.data_columns
         df = self.df_all
 
         # Only the kpis are required for removing outliers
@@ -173,7 +183,7 @@ class TransformRawData:
 
         """Create a temporal index column to be used in the multi index."""
 
-        tempo_idx = self.tempo_idx
+        tempo_idx = self.config.tempo_idx
 
         df = df.sort_values(by=idx + [time_column], ascending=True)
 
@@ -186,9 +196,9 @@ class TransformRawData:
         """Create a multi index for the dataframe."""
 
         df = self.df_all
-        idx = self.idx
-        new_idx = self.idx + [self.tempo_idx]
-        time_column = self.time_column
+        idx = self.config.idx
+        new_idx = idx + [self.config.tempo_idx]
+        time_column = self.config.time_column
         
         df = self._create_tempo_idx_column(df, idx, time_column)
         df = df.set_index(new_idx)
@@ -224,7 +234,7 @@ class TransformRawData:
         """Only keep the sensor columns in the dataframe."""
 
         df = self.df_all
-        cols_to_keep = self.sensors
+        cols_to_keep = self.config.data_columns
         df = df[cols_to_keep]
         self.df_all = df
 
