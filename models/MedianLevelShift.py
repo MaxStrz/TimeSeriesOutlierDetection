@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from scipy.stats import median_abs_deviation
 
 from models.base import PredEstBase
@@ -47,10 +48,12 @@ class MLS(PredEstBase):
         super().__init__(window_size)
     
     def fit(self, data: np.ndarray):
-        """Fit the detector to the data providing level-shift outlier scores
-        for each data point.set
+        """
+        Fit the detector to the data providing level-shift outlier scores
+        for each data point.
         
-        A high score indicates a large diff"""
+        A high score indicates a large diff
+        """
 
         self.data_with_windows = super().remove_end_windows(data)
         self.windows = super().window_maker(data)
@@ -66,7 +69,7 @@ class MLS(PredEstBase):
         self._calculate_outlier_scores()
 
         return self
-    
+     
     def _calculate_outlier_scores(self):
             
         # Relative differences between data and predictions
@@ -83,3 +86,35 @@ class MLS(PredEstBase):
         self.decision_scores_ = np.absolute(
             self.predictions - self.estimations
             )/self.mad
+        
+        # Score for entire univariate timeseries
+        self.score = np.nanmax(self.decision_scores_)
+        
+def est_pred_agg(my_groupby, columns, model):
+    """
+    Aggregates the univariate outlier scores for all groups of a dataframe.
+
+    Parameters
+    ----------
+    my_groupby : pandas groupby object
+        Groupby object of a dataframe
+
+    columns : list
+        List of columns to apply the model to
+
+    model : object
+        Unfitted model that has this api: model().fit(array).score
+
+    Returns
+    -------
+    pandas DataFrame
+        DataFrame of outlier scores for each group
+
+    """
+
+    df_scores = pd.DataFrame({
+        col: my_groupby.apply(lambda x: model.fit(x[col]).score)
+        for col in columns
+        })
+    
+    return df_scores
