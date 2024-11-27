@@ -1,9 +1,6 @@
 import numpy as np
 import pandas as pd
-from pyod.models.hbos import HBOS, _calculate_outlier_scores, check_parameter, invert_order, BaseDetector
-from sklearn.utils.validation import check_array, check_is_fitted
-from typing import Type, Generator, Any
-from tqdm.notebook import tqdm
+from pyod.models.hbos import HBOS, _calculate_outlier_scores, check_parameter, invert_order
 
 class HBOSAgg:
     """
@@ -150,9 +147,6 @@ class HBOS_dynamic_bins(HBOS):
         self : object
             Fitted estimator.
         """
-        # validate inputs X and y (optional)
-        X = check_array(X)
-        self._set_n_classes(y) 
 
         _, n_features = X.shape[0], X.shape[1]
 
