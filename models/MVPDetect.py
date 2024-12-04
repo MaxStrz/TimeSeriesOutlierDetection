@@ -14,6 +14,16 @@ from statsmodels.tsa.ar_model import AutoReg
 from typing import Type, Generator, Any
 from tqdm.notebook import tqdm
 
+class DummyParamLearner:
+    def __init__(self):
+        None
+
+    def learn_params(self, X_train, y_name, fitted_model, trainin):
+        None
+
+    def create_kpi_param_dicts(self):
+        None
+        
 class ParamLearnerLinReg:
     """Parameter Learner for Linear Regression Models"""
     def __init__(self):
@@ -86,7 +96,7 @@ class MVPDetect:
         self.collected_scores_ = defaultdict(lambda: defaultdict(list))
     
     def fit_predict(self, 
-                    dict_partitions, 
+                    dict_partitions,
                     train_test_pairs, 
                     iteration_limit=None):
         """Fit and predict models on each partition

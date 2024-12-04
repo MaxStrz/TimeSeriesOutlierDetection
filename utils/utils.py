@@ -169,11 +169,11 @@ class TransformRawData:
         df = df[cols_to_clean]
         
         # boolean indexes of outliers
-        over_stds_idx = self._find_outliers(df)
+        self.over_stds_idx = self._find_outliers(df)
 
         # remove outliers
         # ~ ist a negation operator. It turns boolean values around.
-        self.df_all = self.df_all[~over_stds_idx].reset_index(drop=True)
+        self.df_all = self.df_all[~self.over_stds_idx].reset_index(drop=True)
 
         self._called_methods.add("clean_data")
 
@@ -290,3 +290,38 @@ class TransformRawData:
         pending_methods = methods - self._called_methods
         note = f"TransformRawData instance. Pending methods: {pending_methods}"
         return note
+
+class Partitions(TransformRawData):
+    """
+    Create DataFrame of partitions from raw data.
+
+    """
+    def __init__(self, analysis_name: str, partition_size: int):
+        super().__init__(analysis_name)
+        self.df_all = super().run().df_all
+        self.partition_size = partition_size
+    
+    @staticmethod
+    def _remove_remainders(df, partition_size):
+
+        remainder = np.mod(df.shape[0], partition_size)
+        df.drop(df.tail(remainder).index, inplace=True)
+
+        return df
+
+    def create_partitions(self):
+
+        groups = self.df_all.groupby(level=[0, 1, 2], group_keys=False)
+
+        df_no_remainders = groups.apply(self._remove_remainders, partition_size=self.partition_size)
+
+        temporal_index = df_no_remainders.index.get_level_values(level=3)
+
+        partition_index = np.floor_divide(temporal_index, self.partition_size)
+
+        partition_index.name = 'partition'
+
+        self.df_all = df_no_remainders.set_index(partition_index, append=True)
+
+        return self
+    
