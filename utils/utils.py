@@ -301,7 +301,7 @@ class Partitions(TransformRawData):
         self.df_all = super().run().df_all
         self.partition_size = partition_size
     
-    @staticmethod
+    @staticmethod # Standalone function for easy reuse
     def _remove_remainders(df, partition_size):
 
         remainder = np.mod(df.shape[0], partition_size)
@@ -311,17 +311,32 @@ class Partitions(TransformRawData):
 
     def create_partitions(self):
 
+        # Group by car_id, component_id, component_part_id
+        # group_keys=False prevents the group keys from being added to the index
+        # In this case, the group keys are the multi-index levels, so if we were
+        # to preserve the group keys, the index would be duplicated.
         groups = self.df_all.groupby(level=[0, 1, 2], group_keys=False)
 
-        df_no_remainders = groups.apply(self._remove_remainders, partition_size=self.partition_size)
+        # Using apply() passes each group to the function along with the 
+        # arguement partition_size. Returns a DataFrame whose 4th level index
+        # always has a length that is a multiple of the partition size i.e.
+        # the remainder is removed.
+        self.df_no_remainders = groups.apply(self._remove_remainders, 
+                                             partition_size=self.partition_size)
 
-        temporal_index = df_no_remainders.index.get_level_values(level=3)
+        # returns only the index values for the 4th level which is the
+        # temporal index e.g. 0, 1, ... n-1 for each component part.
+        self.temporal_index = self.df_no_remainders.index.get_level_values(level=3)
 
-        partition_index = np.floor_divide(temporal_index, self.partition_size)
+        # Using floor_divide is equivalent to integer division i.e. // in Python.
+        # This is a neat way to get the partition index e.g. partition_size = 2
+        # temporal_index = [0, 1, 2, 3] -> partition_index = [0, 0, 1, 1]
+        self.partition_index = np.floor_divide(self.temporal_index, self.partition_size)
 
-        partition_index.name = 'partition'
+        self.partition_index.name = 'partition'
 
-        self.df_all = df_no_remainders.set_index(partition_index, append=True)
+        # Append existing index with the partition index
+        self.df_all = self.df_no_remainders.set_index(self.partition_index, append=True)
 
         return self
     
